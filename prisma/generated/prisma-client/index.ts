@@ -15,6 +15,7 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
 
 export interface Exists {
   post: (where?: PostWhereInput) => Promise<boolean>;
+  product: (where?: ProductWhereInput) => Promise<boolean>;
   user: (where?: UserWhereInput) => Promise<boolean>;
 }
 
@@ -60,6 +61,29 @@ export interface Prisma {
       last?: Int;
     }
   ) => PostConnectionPromise;
+  product: (where: ProductWhereUniqueInput) => ProductPromise;
+  products: (
+    args?: {
+      where?: ProductWhereInput;
+      orderBy?: ProductOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => FragmentableArray<Product>;
+  productsConnection: (
+    args?: {
+      where?: ProductWhereInput;
+      orderBy?: ProductOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => ProductConnectionPromise;
   user: (where: UserWhereUniqueInput) => UserPromise;
   users: (
     args?: {
@@ -105,6 +129,22 @@ export interface Prisma {
   ) => PostPromise;
   deletePost: (where: PostWhereUniqueInput) => PostPromise;
   deleteManyPosts: (where?: PostWhereInput) => BatchPayloadPromise;
+  createProduct: (data: ProductCreateInput) => ProductPromise;
+  updateProduct: (
+    args: { data: ProductUpdateInput; where: ProductWhereUniqueInput }
+  ) => ProductPromise;
+  updateManyProducts: (
+    args: { data: ProductUpdateManyMutationInput; where?: ProductWhereInput }
+  ) => BatchPayloadPromise;
+  upsertProduct: (
+    args: {
+      where: ProductWhereUniqueInput;
+      create: ProductCreateInput;
+      update: ProductUpdateInput;
+    }
+  ) => ProductPromise;
+  deleteProduct: (where: ProductWhereUniqueInput) => ProductPromise;
+  deleteManyProducts: (where?: ProductWhereInput) => BatchPayloadPromise;
   createUser: (data: UserCreateInput) => UserPromise;
   updateUser: (
     args: { data: UserUpdateInput; where: UserWhereUniqueInput }
@@ -133,6 +173,9 @@ export interface Subscription {
   post: (
     where?: PostSubscriptionWhereInput
   ) => PostSubscriptionPayloadSubscription;
+  product: (
+    where?: ProductSubscriptionWhereInput
+  ) => ProductSubscriptionPayloadSubscription;
   user: (
     where?: UserSubscriptionWhereInput
   ) => UserSubscriptionPayloadSubscription;
@@ -160,6 +203,20 @@ export type PostOrderByInput =
   | "content_ASC"
   | "content_DESC";
 
+export type ProductOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
+  | "name_ASC"
+  | "name_DESC"
+  | "pictureUrl_ASC"
+  | "pictureUrl_DESC"
+  | "price_ASC"
+  | "price_DESC"
+  | "createdAt_ASC"
+  | "createdAt_DESC"
+  | "updatedAt_ASC"
+  | "updatedAt_DESC";
+
 export type UserOrderByInput =
   | "id_ASC"
   | "id_DESC"
@@ -176,52 +233,46 @@ export type UserOrderByInput =
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
-export interface UserUpdateOneRequiredWithoutPostsInput {
-  create?: UserCreateWithoutPostsInput;
-  update?: UserUpdateWithoutPostsDataInput;
-  upsert?: UserUpsertWithoutPostsInput;
-  connect?: UserWhereUniqueInput;
+export interface ProductUpdateWithoutSellerDataInput {
+  name?: String;
+  pictureUrl?: String;
+  price?: Float;
 }
 
 export type PostWhereUniqueInput = AtLeastOne<{
   id: ID_Input;
 }>;
 
-export interface PostUpdateWithWhereUniqueWithoutAuthorInput {
-  where: PostWhereUniqueInput;
-  data: PostUpdateWithoutAuthorDataInput;
+export interface PostCreateInput {
+  published?: Boolean;
+  title: String;
+  content: String;
+  author: UserCreateOneWithoutPostsInput;
 }
 
-export interface UserCreateInput {
+export interface PostCreateManyWithoutAuthorInput {
+  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput;
+  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput;
+}
+
+export interface UserCreateOneWithoutPostsInput {
+  create?: UserCreateWithoutPostsInput;
+  connect?: UserWhereUniqueInput;
+}
+
+export interface ProductUpdateManyWithWhereNestedInput {
+  where: ProductScalarWhereInput;
+  data: ProductUpdateManyDataInput;
+}
+
+export interface UserCreateWithoutPostsInput {
   email: String;
   password: String;
   name: String;
-  posts?: PostCreateManyWithoutAuthorInput;
+  products?: ProductCreateManyWithoutSellerInput;
 }
 
-export interface PostUpdateManyWithoutAuthorInput {
-  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput;
-  delete?: PostWhereUniqueInput[] | PostWhereUniqueInput;
-  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput;
-  disconnect?: PostWhereUniqueInput[] | PostWhereUniqueInput;
-  update?:
-    | PostUpdateWithWhereUniqueWithoutAuthorInput[]
-    | PostUpdateWithWhereUniqueWithoutAuthorInput;
-  upsert?:
-    | PostUpsertWithWhereUniqueWithoutAuthorInput[]
-    | PostUpsertWithWhereUniqueWithoutAuthorInput;
-  deleteMany?: PostScalarWhereInput[] | PostScalarWhereInput;
-  updateMany?:
-    | PostUpdateManyWithWhereNestedInput[]
-    | PostUpdateManyWithWhereNestedInput;
-}
-
-export interface UserUpsertWithoutPostsInput {
-  update: UserUpdateWithoutPostsDataInput;
-  create: UserCreateWithoutPostsInput;
-}
-
-export interface UserWhereInput {
+export interface ProductWhereInput {
   id?: ID_Input;
   id_not?: ID_Input;
   id_in?: ID_Input[] | ID_Input;
@@ -236,34 +287,6 @@ export interface UserWhereInput {
   id_not_starts_with?: ID_Input;
   id_ends_with?: ID_Input;
   id_not_ends_with?: ID_Input;
-  email?: String;
-  email_not?: String;
-  email_in?: String[] | String;
-  email_not_in?: String[] | String;
-  email_lt?: String;
-  email_lte?: String;
-  email_gt?: String;
-  email_gte?: String;
-  email_contains?: String;
-  email_not_contains?: String;
-  email_starts_with?: String;
-  email_not_starts_with?: String;
-  email_ends_with?: String;
-  email_not_ends_with?: String;
-  password?: String;
-  password_not?: String;
-  password_in?: String[] | String;
-  password_not_in?: String[] | String;
-  password_lt?: String;
-  password_lte?: String;
-  password_gt?: String;
-  password_gte?: String;
-  password_contains?: String;
-  password_not_contains?: String;
-  password_starts_with?: String;
-  password_not_starts_with?: String;
-  password_ends_with?: String;
-  password_not_ends_with?: String;
   name?: String;
   name_not?: String;
   name_in?: String[] | String;
@@ -278,41 +301,115 @@ export interface UserWhereInput {
   name_not_starts_with?: String;
   name_ends_with?: String;
   name_not_ends_with?: String;
-  posts_every?: PostWhereInput;
-  posts_some?: PostWhereInput;
-  posts_none?: PostWhereInput;
-  AND?: UserWhereInput[] | UserWhereInput;
-  OR?: UserWhereInput[] | UserWhereInput;
-  NOT?: UserWhereInput[] | UserWhereInput;
+  pictureUrl?: String;
+  pictureUrl_not?: String;
+  pictureUrl_in?: String[] | String;
+  pictureUrl_not_in?: String[] | String;
+  pictureUrl_lt?: String;
+  pictureUrl_lte?: String;
+  pictureUrl_gt?: String;
+  pictureUrl_gte?: String;
+  pictureUrl_contains?: String;
+  pictureUrl_not_contains?: String;
+  pictureUrl_starts_with?: String;
+  pictureUrl_not_starts_with?: String;
+  pictureUrl_ends_with?: String;
+  pictureUrl_not_ends_with?: String;
+  price?: Float;
+  price_not?: Float;
+  price_in?: Float[] | Float;
+  price_not_in?: Float[] | Float;
+  price_lt?: Float;
+  price_lte?: Float;
+  price_gt?: Float;
+  price_gte?: Float;
+  seller?: UserWhereInput;
+  AND?: ProductWhereInput[] | ProductWhereInput;
+  OR?: ProductWhereInput[] | ProductWhereInput;
+  NOT?: ProductWhereInput[] | ProductWhereInput;
 }
 
-export interface PostSubscriptionWhereInput {
+export interface ProductCreateManyWithoutSellerInput {
+  create?: ProductCreateWithoutSellerInput[] | ProductCreateWithoutSellerInput;
+  connect?: ProductWhereUniqueInput[] | ProductWhereUniqueInput;
+}
+
+export interface ProductSubscriptionWhereInput {
   mutation_in?: MutationType[] | MutationType;
   updatedFields_contains?: String;
   updatedFields_contains_every?: String[] | String;
   updatedFields_contains_some?: String[] | String;
-  node?: PostWhereInput;
-  AND?: PostSubscriptionWhereInput[] | PostSubscriptionWhereInput;
-  OR?: PostSubscriptionWhereInput[] | PostSubscriptionWhereInput;
-  NOT?: PostSubscriptionWhereInput[] | PostSubscriptionWhereInput;
+  node?: ProductWhereInput;
+  AND?: ProductSubscriptionWhereInput[] | ProductSubscriptionWhereInput;
+  OR?: ProductSubscriptionWhereInput[] | ProductSubscriptionWhereInput;
+  NOT?: ProductSubscriptionWhereInput[] | ProductSubscriptionWhereInput;
 }
 
-export interface PostCreateInput {
-  published?: Boolean;
-  title: String;
-  content: String;
-  author: UserCreateOneWithoutPostsInput;
+export interface ProductCreateWithoutSellerInput {
+  name: String;
+  pictureUrl: String;
+  price: Float;
 }
 
-export interface PostUpdateManyDataInput {
+export interface UserUpdateManyMutationInput {
+  email?: String;
+  password?: String;
+  name?: String;
+}
+
+export interface PostUpdateInput {
   published?: Boolean;
   title?: String;
   content?: String;
+  author?: UserUpdateOneRequiredWithoutPostsInput;
 }
 
-export interface UserCreateOneWithoutPostsInput {
+export interface UserCreateInput {
+  email: String;
+  password: String;
+  name: String;
+  posts?: PostCreateManyWithoutAuthorInput;
+  products?: ProductCreateManyWithoutSellerInput;
+}
+
+export interface UserUpdateOneRequiredWithoutPostsInput {
   create?: UserCreateWithoutPostsInput;
+  update?: UserUpdateWithoutPostsDataInput;
+  upsert?: UserUpsertWithoutPostsInput;
   connect?: UserWhereUniqueInput;
+}
+
+export interface UserUpsertWithoutProductsInput {
+  update: UserUpdateWithoutProductsDataInput;
+  create: UserCreateWithoutProductsInput;
+}
+
+export interface UserUpdateWithoutPostsDataInput {
+  email?: String;
+  password?: String;
+  name?: String;
+  products?: ProductUpdateManyWithoutSellerInput;
+}
+
+export type ProductWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
+
+export interface ProductUpdateManyWithoutSellerInput {
+  create?: ProductCreateWithoutSellerInput[] | ProductCreateWithoutSellerInput;
+  delete?: ProductWhereUniqueInput[] | ProductWhereUniqueInput;
+  connect?: ProductWhereUniqueInput[] | ProductWhereUniqueInput;
+  disconnect?: ProductWhereUniqueInput[] | ProductWhereUniqueInput;
+  update?:
+    | ProductUpdateWithWhereUniqueWithoutSellerInput[]
+    | ProductUpdateWithWhereUniqueWithoutSellerInput;
+  upsert?:
+    | ProductUpsertWithWhereUniqueWithoutSellerInput[]
+    | ProductUpsertWithWhereUniqueWithoutSellerInput;
+  deleteMany?: ProductScalarWhereInput[] | ProductScalarWhereInput;
+  updateMany?:
+    | ProductUpdateManyWithWhereNestedInput[]
+    | ProductUpdateManyWithWhereNestedInput;
 }
 
 export interface PostScalarWhereInput {
@@ -381,23 +478,163 @@ export interface PostScalarWhereInput {
   NOT?: PostScalarWhereInput[] | PostScalarWhereInput;
 }
 
-export interface UserCreateWithoutPostsInput {
-  email: String;
-  password: String;
-  name: String;
+export interface ProductUpdateWithWhereUniqueWithoutSellerInput {
+  where: ProductWhereUniqueInput;
+  data: ProductUpdateWithoutSellerDataInput;
 }
 
-export interface PostUpsertWithWhereUniqueWithoutAuthorInput {
+export type UserWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+  email?: String;
+}>;
+
+export interface UserUpdateOneRequiredWithoutProductsInput {
+  create?: UserCreateWithoutProductsInput;
+  update?: UserUpdateWithoutProductsDataInput;
+  upsert?: UserUpsertWithoutProductsInput;
+  connect?: UserWhereUniqueInput;
+}
+
+export interface PostUpdateWithWhereUniqueWithoutAuthorInput {
   where: PostWhereUniqueInput;
-  update: PostUpdateWithoutAuthorDataInput;
-  create: PostCreateWithoutAuthorInput;
+  data: PostUpdateWithoutAuthorDataInput;
 }
 
-export interface PostUpdateInput {
-  published?: Boolean;
-  title?: String;
-  content?: String;
-  author?: UserUpdateOneRequiredWithoutPostsInput;
+export interface ProductUpsertWithWhereUniqueWithoutSellerInput {
+  where: ProductWhereUniqueInput;
+  update: ProductUpdateWithoutSellerDataInput;
+  create: ProductCreateWithoutSellerInput;
+}
+
+export interface UserUpdateWithoutProductsDataInput {
+  email?: String;
+  password?: String;
+  name?: String;
+  posts?: PostUpdateManyWithoutAuthorInput;
+}
+
+export interface ProductScalarWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  name?: String;
+  name_not?: String;
+  name_in?: String[] | String;
+  name_not_in?: String[] | String;
+  name_lt?: String;
+  name_lte?: String;
+  name_gt?: String;
+  name_gte?: String;
+  name_contains?: String;
+  name_not_contains?: String;
+  name_starts_with?: String;
+  name_not_starts_with?: String;
+  name_ends_with?: String;
+  name_not_ends_with?: String;
+  pictureUrl?: String;
+  pictureUrl_not?: String;
+  pictureUrl_in?: String[] | String;
+  pictureUrl_not_in?: String[] | String;
+  pictureUrl_lt?: String;
+  pictureUrl_lte?: String;
+  pictureUrl_gt?: String;
+  pictureUrl_gte?: String;
+  pictureUrl_contains?: String;
+  pictureUrl_not_contains?: String;
+  pictureUrl_starts_with?: String;
+  pictureUrl_not_starts_with?: String;
+  pictureUrl_ends_with?: String;
+  pictureUrl_not_ends_with?: String;
+  price?: Float;
+  price_not?: Float;
+  price_in?: Float[] | Float;
+  price_not_in?: Float[] | Float;
+  price_lt?: Float;
+  price_lte?: Float;
+  price_gt?: Float;
+  price_gte?: Float;
+  AND?: ProductScalarWhereInput[] | ProductScalarWhereInput;
+  OR?: ProductScalarWhereInput[] | ProductScalarWhereInput;
+  NOT?: ProductScalarWhereInput[] | ProductScalarWhereInput;
+}
+
+export interface UserWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  email?: String;
+  email_not?: String;
+  email_in?: String[] | String;
+  email_not_in?: String[] | String;
+  email_lt?: String;
+  email_lte?: String;
+  email_gt?: String;
+  email_gte?: String;
+  email_contains?: String;
+  email_not_contains?: String;
+  email_starts_with?: String;
+  email_not_starts_with?: String;
+  email_ends_with?: String;
+  email_not_ends_with?: String;
+  password?: String;
+  password_not?: String;
+  password_in?: String[] | String;
+  password_not_in?: String[] | String;
+  password_lt?: String;
+  password_lte?: String;
+  password_gt?: String;
+  password_gte?: String;
+  password_contains?: String;
+  password_not_contains?: String;
+  password_starts_with?: String;
+  password_not_starts_with?: String;
+  password_ends_with?: String;
+  password_not_ends_with?: String;
+  name?: String;
+  name_not?: String;
+  name_in?: String[] | String;
+  name_not_in?: String[] | String;
+  name_lt?: String;
+  name_lte?: String;
+  name_gt?: String;
+  name_gte?: String;
+  name_contains?: String;
+  name_not_contains?: String;
+  name_starts_with?: String;
+  name_not_starts_with?: String;
+  name_ends_with?: String;
+  name_not_ends_with?: String;
+  posts_every?: PostWhereInput;
+  posts_some?: PostWhereInput;
+  posts_none?: PostWhereInput;
+  products_every?: ProductWhereInput;
+  products_some?: ProductWhereInput;
+  products_none?: ProductWhereInput;
+  AND?: UserWhereInput[] | UserWhereInput;
+  OR?: UserWhereInput[] | UserWhereInput;
+  NOT?: UserWhereInput[] | UserWhereInput;
 }
 
 export interface PostWhereInput {
@@ -467,22 +704,37 @@ export interface PostWhereInput {
   NOT?: PostWhereInput[] | PostWhereInput;
 }
 
-export interface UserUpdateInput {
-  email?: String;
-  password?: String;
-  name?: String;
-  posts?: PostUpdateManyWithoutAuthorInput;
+export interface PostSubscriptionWhereInput {
+  mutation_in?: MutationType[] | MutationType;
+  updatedFields_contains?: String;
+  updatedFields_contains_every?: String[] | String;
+  updatedFields_contains_some?: String[] | String;
+  node?: PostWhereInput;
+  AND?: PostSubscriptionWhereInput[] | PostSubscriptionWhereInput;
+  OR?: PostSubscriptionWhereInput[] | PostSubscriptionWhereInput;
+  NOT?: PostSubscriptionWhereInput[] | PostSubscriptionWhereInput;
 }
 
-export interface UserUpdateManyMutationInput {
-  email?: String;
-  password?: String;
+export interface ProductUpdateManyDataInput {
   name?: String;
+  pictureUrl?: String;
+  price?: Float;
 }
 
-export interface PostCreateManyWithoutAuthorInput {
-  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput;
-  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput;
+export interface ProductUpdateManyMutationInput {
+  name?: String;
+  pictureUrl?: String;
+  price?: Float;
+}
+
+export interface UserUpsertWithoutPostsInput {
+  update: UserUpdateWithoutPostsDataInput;
+  create: UserCreateWithoutPostsInput;
+}
+
+export interface PostUpdateManyWithWhereNestedInput {
+  where: PostScalarWhereInput;
+  data: PostUpdateManyDataInput;
 }
 
 export interface PostUpdateManyMutationInput {
@@ -491,21 +743,56 @@ export interface PostUpdateManyMutationInput {
   content?: String;
 }
 
+export interface PostUpdateWithoutAuthorDataInput {
+  published?: Boolean;
+  title?: String;
+  content?: String;
+}
+
+export interface ProductUpdateInput {
+  name?: String;
+  pictureUrl?: String;
+  price?: Float;
+  seller?: UserUpdateOneRequiredWithoutProductsInput;
+}
+
+export interface UserUpdateInput {
+  email?: String;
+  password?: String;
+  name?: String;
+  posts?: PostUpdateManyWithoutAuthorInput;
+  products?: ProductUpdateManyWithoutSellerInput;
+}
+
+export interface UserCreateWithoutProductsInput {
+  email: String;
+  password: String;
+  name: String;
+  posts?: PostCreateManyWithoutAuthorInput;
+}
+
+export interface UserCreateOneWithoutProductsInput {
+  create?: UserCreateWithoutProductsInput;
+  connect?: UserWhereUniqueInput;
+}
+
+export interface ProductCreateInput {
+  name: String;
+  pictureUrl: String;
+  price: Float;
+  seller: UserCreateOneWithoutProductsInput;
+}
+
 export interface PostCreateWithoutAuthorInput {
   published?: Boolean;
   title: String;
   content: String;
 }
 
-export interface UserUpdateWithoutPostsDataInput {
-  email?: String;
-  password?: String;
-  name?: String;
-}
-
-export interface PostUpdateManyWithWhereNestedInput {
-  where: PostScalarWhereInput;
-  data: PostUpdateManyDataInput;
+export interface PostUpdateManyDataInput {
+  published?: Boolean;
+  title?: String;
+  content?: String;
 }
 
 export interface UserSubscriptionWhereInput {
@@ -519,16 +806,28 @@ export interface UserSubscriptionWhereInput {
   NOT?: UserSubscriptionWhereInput[] | UserSubscriptionWhereInput;
 }
 
-export interface PostUpdateWithoutAuthorDataInput {
-  published?: Boolean;
-  title?: String;
-  content?: String;
+export interface PostUpdateManyWithoutAuthorInput {
+  create?: PostCreateWithoutAuthorInput[] | PostCreateWithoutAuthorInput;
+  delete?: PostWhereUniqueInput[] | PostWhereUniqueInput;
+  connect?: PostWhereUniqueInput[] | PostWhereUniqueInput;
+  disconnect?: PostWhereUniqueInput[] | PostWhereUniqueInput;
+  update?:
+    | PostUpdateWithWhereUniqueWithoutAuthorInput[]
+    | PostUpdateWithWhereUniqueWithoutAuthorInput;
+  upsert?:
+    | PostUpsertWithWhereUniqueWithoutAuthorInput[]
+    | PostUpsertWithWhereUniqueWithoutAuthorInput;
+  deleteMany?: PostScalarWhereInput[] | PostScalarWhereInput;
+  updateMany?:
+    | PostUpdateManyWithWhereNestedInput[]
+    | PostUpdateManyWithWhereNestedInput;
 }
 
-export type UserWhereUniqueInput = AtLeastOne<{
-  id: ID_Input;
-  email?: String;
-}>;
+export interface PostUpsertWithWhereUniqueWithoutAuthorInput {
+  where: PostWhereUniqueInput;
+  update: PostUpdateWithoutAuthorDataInput;
+  create: PostCreateWithoutAuthorInput;
+}
 
 export interface NodeNode {
   id: ID_Output;
@@ -557,6 +856,111 @@ export interface UserPreviousValuesSubscription
   email: () => Promise<AsyncIterator<String>>;
   password: () => Promise<AsyncIterator<String>>;
   name: () => Promise<AsyncIterator<String>>;
+}
+
+export interface PostConnection {
+  pageInfo: PageInfo;
+  edges: PostEdge[];
+}
+
+export interface PostConnectionPromise
+  extends Promise<PostConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<PostEdge>>() => T;
+  aggregate: <T = AggregatePostPromise>() => T;
+}
+
+export interface PostConnectionSubscription
+  extends Promise<AsyncIterator<PostConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<PostEdgeSubscription>>>() => T;
+  aggregate: <T = AggregatePostSubscription>() => T;
+}
+
+export interface User {
+  id: ID_Output;
+  email: String;
+  password: String;
+  name: String;
+}
+
+export interface UserPromise extends Promise<User>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  email: () => Promise<String>;
+  password: () => Promise<String>;
+  name: () => Promise<String>;
+  posts: <T = FragmentableArray<Post>>(
+    args?: {
+      where?: PostWhereInput;
+      orderBy?: PostOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+  products: <T = FragmentableArray<Product>>(
+    args?: {
+      where?: ProductWhereInput;
+      orderBy?: ProductOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+}
+
+export interface UserSubscription
+  extends Promise<AsyncIterator<User>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  email: () => Promise<AsyncIterator<String>>;
+  password: () => Promise<AsyncIterator<String>>;
+  name: () => Promise<AsyncIterator<String>>;
+  posts: <T = Promise<AsyncIterator<PostSubscription>>>(
+    args?: {
+      where?: PostWhereInput;
+      orderBy?: PostOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+  products: <T = Promise<AsyncIterator<ProductSubscription>>>(
+    args?: {
+      where?: ProductWhereInput;
+      orderBy?: ProductOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+}
+
+export interface PostEdge {
+  node: Post;
+  cursor: String;
+}
+
+export interface PostEdgePromise extends Promise<PostEdge>, Fragmentable {
+  node: <T = PostPromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface PostEdgeSubscription
+  extends Promise<AsyncIterator<PostEdge>>,
+    Fragmentable {
+  node: <T = PostSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
 }
 
 export interface PostPreviousValues {
@@ -590,6 +994,169 @@ export interface PostPreviousValuesSubscription
   content: () => Promise<AsyncIterator<String>>;
 }
 
+export interface PageInfo {
+  hasNextPage: Boolean;
+  hasPreviousPage: Boolean;
+  startCursor?: String;
+  endCursor?: String;
+}
+
+export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
+  hasNextPage: () => Promise<Boolean>;
+  hasPreviousPage: () => Promise<Boolean>;
+  startCursor: () => Promise<String>;
+  endCursor: () => Promise<String>;
+}
+
+export interface PageInfoSubscription
+  extends Promise<AsyncIterator<PageInfo>>,
+    Fragmentable {
+  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
+  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
+  startCursor: () => Promise<AsyncIterator<String>>;
+  endCursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface Product {
+  id: ID_Output;
+  name: String;
+  pictureUrl: String;
+  price: Float;
+}
+
+export interface ProductPromise extends Promise<Product>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  pictureUrl: () => Promise<String>;
+  price: () => Promise<Float>;
+  seller: <T = UserPromise>() => T;
+}
+
+export interface ProductSubscription
+  extends Promise<AsyncIterator<Product>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  pictureUrl: () => Promise<AsyncIterator<String>>;
+  price: () => Promise<AsyncIterator<Float>>;
+  seller: <T = UserSubscription>() => T;
+}
+
+export interface BatchPayload {
+  count: Long;
+}
+
+export interface BatchPayloadPromise
+  extends Promise<BatchPayload>,
+    Fragmentable {
+  count: () => Promise<Long>;
+}
+
+export interface BatchPayloadSubscription
+  extends Promise<AsyncIterator<BatchPayload>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Long>>;
+}
+
+export interface UserConnection {
+  pageInfo: PageInfo;
+  edges: UserEdge[];
+}
+
+export interface UserConnectionPromise
+  extends Promise<UserConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<UserEdge>>() => T;
+  aggregate: <T = AggregateUserPromise>() => T;
+}
+
+export interface UserConnectionSubscription
+  extends Promise<AsyncIterator<UserConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<UserEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateUserSubscription>() => T;
+}
+
+export interface AggregateUser {
+  count: Int;
+}
+
+export interface AggregateUserPromise
+  extends Promise<AggregateUser>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateUserSubscription
+  extends Promise<AsyncIterator<AggregateUser>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface AggregateProduct {
+  count: Int;
+}
+
+export interface AggregateProductPromise
+  extends Promise<AggregateProduct>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateProductSubscription
+  extends Promise<AsyncIterator<AggregateProduct>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface ProductConnection {
+  pageInfo: PageInfo;
+  edges: ProductEdge[];
+}
+
+export interface ProductConnectionPromise
+  extends Promise<ProductConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<ProductEdge>>() => T;
+  aggregate: <T = AggregateProductPromise>() => T;
+}
+
+export interface ProductConnectionSubscription
+  extends Promise<AsyncIterator<ProductConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<ProductEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateProductSubscription>() => T;
+}
+
+export interface PostSubscriptionPayload {
+  mutation: MutationType;
+  node: Post;
+  updatedFields: String[];
+  previousValues: PostPreviousValues;
+}
+
+export interface PostSubscriptionPayloadPromise
+  extends Promise<PostSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = PostPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = PostPreviousValuesPromise>() => T;
+}
+
+export interface PostSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<PostSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = PostSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = PostPreviousValuesSubscription>() => T;
+}
+
 export interface Post {
   id: ID_Output;
   createdAt: DateTimeOutput;
@@ -621,6 +1188,56 @@ export interface PostSubscription
   author: <T = UserSubscription>() => T;
 }
 
+export interface ProductSubscriptionPayload {
+  mutation: MutationType;
+  node: Product;
+  updatedFields: String[];
+  previousValues: ProductPreviousValues;
+}
+
+export interface ProductSubscriptionPayloadPromise
+  extends Promise<ProductSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = ProductPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = ProductPreviousValuesPromise>() => T;
+}
+
+export interface ProductSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<ProductSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = ProductSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = ProductPreviousValuesSubscription>() => T;
+}
+
+export interface ProductPreviousValues {
+  id: ID_Output;
+  name: String;
+  pictureUrl: String;
+  price: Float;
+}
+
+export interface ProductPreviousValuesPromise
+  extends Promise<ProductPreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  pictureUrl: () => Promise<String>;
+  price: () => Promise<Float>;
+}
+
+export interface ProductPreviousValuesSubscription
+  extends Promise<AsyncIterator<ProductPreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  pictureUrl: () => Promise<AsyncIterator<String>>;
+  price: () => Promise<AsyncIterator<Float>>;
+}
+
 export interface AggregatePost {
   count: Int;
 }
@@ -637,20 +1254,20 @@ export interface AggregatePostSubscription
   count: () => Promise<AsyncIterator<Int>>;
 }
 
-export interface PostEdge {
-  node: Post;
+export interface ProductEdge {
+  node: Product;
   cursor: String;
 }
 
-export interface PostEdgePromise extends Promise<PostEdge>, Fragmentable {
-  node: <T = PostPromise>() => T;
+export interface ProductEdgePromise extends Promise<ProductEdge>, Fragmentable {
+  node: <T = ProductPromise>() => T;
   cursor: () => Promise<String>;
 }
 
-export interface PostEdgeSubscription
-  extends Promise<AsyncIterator<PostEdge>>,
+export interface ProductEdgeSubscription
+  extends Promise<AsyncIterator<ProductEdge>>,
     Fragmentable {
-  node: <T = PostSubscription>() => T;
+  node: <T = ProductSubscription>() => T;
   cursor: () => Promise<AsyncIterator<String>>;
 }
 
@@ -679,173 +1296,6 @@ export interface UserSubscriptionPayloadSubscription
   previousValues: <T = UserPreviousValuesSubscription>() => T;
 }
 
-export interface PostSubscriptionPayload {
-  mutation: MutationType;
-  node: Post;
-  updatedFields: String[];
-  previousValues: PostPreviousValues;
-}
-
-export interface PostSubscriptionPayloadPromise
-  extends Promise<PostSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = PostPromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = PostPreviousValuesPromise>() => T;
-}
-
-export interface PostSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<PostSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = PostSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = PostPreviousValuesSubscription>() => T;
-}
-
-export interface PostConnection {
-  pageInfo: PageInfo;
-  edges: PostEdge[];
-}
-
-export interface PostConnectionPromise
-  extends Promise<PostConnection>,
-    Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<PostEdge>>() => T;
-  aggregate: <T = AggregatePostPromise>() => T;
-}
-
-export interface PostConnectionSubscription
-  extends Promise<AsyncIterator<PostConnection>>,
-    Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<PostEdgeSubscription>>>() => T;
-  aggregate: <T = AggregatePostSubscription>() => T;
-}
-
-export interface PageInfo {
-  hasNextPage: Boolean;
-  hasPreviousPage: Boolean;
-  startCursor?: String;
-  endCursor?: String;
-}
-
-export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
-  hasNextPage: () => Promise<Boolean>;
-  hasPreviousPage: () => Promise<Boolean>;
-  startCursor: () => Promise<String>;
-  endCursor: () => Promise<String>;
-}
-
-export interface PageInfoSubscription
-  extends Promise<AsyncIterator<PageInfo>>,
-    Fragmentable {
-  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
-  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
-  startCursor: () => Promise<AsyncIterator<String>>;
-  endCursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface BatchPayload {
-  count: Long;
-}
-
-export interface BatchPayloadPromise
-  extends Promise<BatchPayload>,
-    Fragmentable {
-  count: () => Promise<Long>;
-}
-
-export interface BatchPayloadSubscription
-  extends Promise<AsyncIterator<BatchPayload>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Long>>;
-}
-
-export interface AggregateUser {
-  count: Int;
-}
-
-export interface AggregateUserPromise
-  extends Promise<AggregateUser>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateUserSubscription
-  extends Promise<AsyncIterator<AggregateUser>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface User {
-  id: ID_Output;
-  email: String;
-  password: String;
-  name: String;
-}
-
-export interface UserPromise extends Promise<User>, Fragmentable {
-  id: () => Promise<ID_Output>;
-  email: () => Promise<String>;
-  password: () => Promise<String>;
-  name: () => Promise<String>;
-  posts: <T = FragmentableArray<Post>>(
-    args?: {
-      where?: PostWhereInput;
-      orderBy?: PostOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => T;
-}
-
-export interface UserSubscription
-  extends Promise<AsyncIterator<User>>,
-    Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  email: () => Promise<AsyncIterator<String>>;
-  password: () => Promise<AsyncIterator<String>>;
-  name: () => Promise<AsyncIterator<String>>;
-  posts: <T = Promise<AsyncIterator<PostSubscription>>>(
-    args?: {
-      where?: PostWhereInput;
-      orderBy?: PostOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => T;
-}
-
-export interface UserConnection {
-  pageInfo: PageInfo;
-  edges: UserEdge[];
-}
-
-export interface UserConnectionPromise
-  extends Promise<UserConnection>,
-    Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<UserEdge>>() => T;
-  aggregate: <T = AggregateUserPromise>() => T;
-}
-
-export interface UserConnectionSubscription
-  extends Promise<AsyncIterator<UserConnection>>,
-    Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<UserEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateUserSubscription>() => T;
-}
-
 export interface UserEdge {
   node: User;
   cursor: String;
@@ -863,11 +1313,6 @@ export interface UserEdgeSubscription
   cursor: () => Promise<AsyncIterator<String>>;
 }
 
-/*
-The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
-*/
-export type String = string;
-
 export type Long = string;
 
 /*
@@ -875,11 +1320,6 @@ The `ID` scalar type represents a unique identifier, often used to refetch an ob
 */
 export type ID_Input = string | number;
 export type ID_Output = string;
-
-/*
-The `Boolean` scalar type represents `true` or `false`.
-*/
-export type Boolean = boolean;
 
 /*
 DateTime scalar input type, allowing Date
@@ -892,9 +1332,24 @@ DateTime scalar output type, which is always a string
 export type DateTimeOutput = string;
 
 /*
+The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point). 
+*/
+export type Float = number;
+
+/*
+The `Boolean` scalar type represents `true` or `false`.
+*/
+export type Boolean = boolean;
+
+/*
 The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. 
 */
 export type Int = number;
+
+/*
+The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
+*/
+export type String = string;
 
 /**
  * Model Metadata
@@ -903,6 +1358,10 @@ export type Int = number;
 export const models: Model[] = [
   {
     name: "Post",
+    embedded: false
+  },
+  {
+    name: "Product",
     embedded: false
   },
   {
