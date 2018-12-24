@@ -7,10 +7,20 @@ type Query {
 
 type Mutation {
   signup(email: String!, password: String!, name: String!): AuthPayload!
-  login(email: String!, password: String!): AuthPayload!
+  login(email: String!, password: String!): LoginPayload!
   createDraft(title: String!, content: String!): Post!
   publish(id: ID!): Post!
   deletePost(id: ID!): Post!
+}
+
+type Error {
+  field: String!
+  msg: String!
+}
+
+type LoginPayload {
+  payload: AuthPayload
+  error: Error
 }
 
 type Subscription {
