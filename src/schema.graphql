@@ -1,4 +1,5 @@
 # import Product, ProductWhereInput, ProductOrderByInput from "../prisma/generated/prisma-client-graphql/prisma.graphql"
+# import Query.products from "../prisma/generated/prisma-client-graphql/prisma.graphql"
 
 scalar Upload
 
@@ -7,15 +8,15 @@ type Query {
   drafts: [Post!]!
   post(id: ID!): Post
   me: User
-  products(
-    where: ProductWhereInput,
-    orderBy: ProductOrderByInput,
-    skip: Int,
-    after: String,
-    before: String,
-    first: Int,
-    last: Int
-  ): [Product]!
+  # products(
+  #   where: ProductWhereInput,
+  #   orderBy: ProductOrderByInput,
+  #   skip: Int,
+  #   after: String,
+  #   before: String,
+  #   first: Int,
+  #   last: Int
+  # ): [Product]!
 }
 
 type Mutation {

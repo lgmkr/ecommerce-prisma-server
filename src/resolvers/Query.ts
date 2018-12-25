@@ -1,6 +1,13 @@
 import { getUserId, Context } from '../utils'
+import { forwardTo } from 'prisma-binding'
 
 export const Query = {
+  // products: forwardTo('prisma'),
+  // TODO: forwardTo is looking for prisma.query.products
+  products(parent, { where, skip, last, first }, ctx) {
+    return ctx.prisma.products({ where, skip, last, first })
+  },
+
   feed(parent, args, ctx: Context) {
     return ctx.prisma.posts({ where: { published: true } })
   },
