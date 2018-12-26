@@ -7,6 +7,7 @@ type Query {
   feed: [Post!]!
   drafts: [Post!]!
   post(id: ID!): Post
+  product(id: ID!): Product
   me: User
   # products(
   #   where: ProductWhereInput,
@@ -20,7 +21,7 @@ type Query {
 }
 
 type Mutation {
-  refreshToken: String!
+  refreshToken: RefreshTokenPayload!
   signup(email: String!, password: String!, name: String!): AuthPayload!
   login(email: String!, password: String!): LoginPayload!
   createProduct(name: String!, price: Float!, picture: Upload!): Product!
@@ -29,10 +30,17 @@ type Mutation {
   deletePost(id: ID!): Post!
 }
 
+type RefreshTokenPayload {
+  token: String!
+  userId: String!
+}
+
 type Error {
   field: String!
   msg: String!
 }
+
+
 
 type LoginPayload {
   payload: AuthPayload
