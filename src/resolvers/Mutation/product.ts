@@ -36,4 +36,27 @@ export const product = {
       // info
     )
   },
+
+  async updateProduct(parent, { id, name, price, picture }, ctx: Context, info) {
+    const userId = getUserId(ctx);
+
+    let pictureUrl = null;
+    if (picture) {
+      pictureUrl = await processUpload(picture);
+    }
+
+    return ctx.prisma.updateProduct(
+      {
+        data: {
+          name,
+          price,
+          pictureUrl
+        },
+        where: {
+          id
+        }
+      },
+      // info
+    );
+  },
 }
